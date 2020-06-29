@@ -1,0 +1,124 @@
+clc; 
+clear; 
+close all; 
+%% import the fluffy controller traffic 
+fuzsel=readfis('fuzzyselect.fis'); 
+fuzgrntme=readfis('fuzzygreentime.fis'); %%determine the time that light flag 
+figure1=figure; 
+%% inistalized 
+x=[0 30 5 40]; 
+y=[0 0 0]; 
+%% cycle
+itr=18; 
+tf=ones(1,4); %(default is 5) 
+b=zeros(0,itr); 
+%% time assignment for each light 
+yellowtime=1; 
+exittime=0.3; 
+entercar=2; 
+exitcar=12; 
+coeff=[1 2 1 2]; 
+%% circle intisilaized 
+for ii=2:itr 
+clf('reset'); 
+feature1(x,y,figure1); 
+xrand=round(abs(rand(1,4)).*entercar); 
+x=x+xrand; 
+% fluffy controller decide with path 
+on the off chance that x<[60 60 60] % space of fluffy controller 
+ytemp=evalfis(x,fuzsel); 
+ifytemp<=3 
+b(ii)=1; 
+elseifytemp<=6 
+b(ii)=2; 
+elseifytemp<9 
+b(ii)=3; 
+elseifytemp<12 
+b(ii)=4; 
+else 
+[a,b(ii)]=max(x); 
+end 
+else 
+[a,b(ii)]=max(x); 
+end
+for m=1:4 
+iftf(m)>=5 
+y=zeros(1,4); 
+tf(m)=0; 
+b(ii)=m; 
+end 
+end 
+y=zeros(1,4); y(b(ii))=1; 
+tf=tf+ones(1,4); 
+tf(b(ii))=0; 
+% Yellow Light design 
+on the off chance that b(ii)~=b(ii-1) and ii~=2 
+y(b(ii-1))=0.5; 
+y(b(ii))=0; 
+feat2(x,y,figure1); 
+pause(yellowtime); 
+y(b(ii-1))=0; 
+y(b(ii))=1; 
+end 
+% fc decide green time 
+on the off chance that x< [60 60 60] 
+greentimetemp=evalfis(x,fuzgrntme); 
+ifgreentimetemp<=4 
+timeconstantfuzzy=.8; 
+elseifgreentimetemp<=10 
+timeconstantfuzzy=.9; 
+else 
+timeconstantfuzzy=1; 
+end 
+else 
+timeconstantfuzzy=0.8;
+end 
+greentime(ii)=ceil(((x(b(ii))+(.7*entercar))/exitcar)*timeconstantfuzzy); 
+for j=1:greentime(ii)+1 
+x(b(ii))=x(b(ii))- exitcar; 
+xrand=round(abs(rand(1,4)).*entercar.*coeff); 
+x=x+xrand; 
+on the off chance that x(b(ii))<=0 
+x(b(ii))=0; 
+feat2(x,y,figure1); 
+pause(exittime); 
+break 
+break 
+end 
+feat2(x,y,figure1); 
+pause(exittime); 
+end 
+end 
+%%statistics esteem 
+[aa1 bb1]=find(b==1); 
+[aa2 bb2]=find(b==2); 
+[aa3 bb3]=find(b==3); 
+[aa4 bb4]=find(b==4); 
+%% tallying some portion of every road 
+CarsCounter=exitcar.*greentime; 
+CarsCounter1=0; %1st path 
+CarsCounter2=0; %2nd path 
+CarsCounter3=0; %3rd path 
+CarsCounter4=0; %4th path 
+%% circling area 
+for n=1:length(bb1) 
+CarsCounter1=CarsCounter1+CarsCounter(bb1(n)); 
+end
+for n=1:length(bb2) 
+CarsCounter2=CarsCounter2+CarsCounter(bb2(n)); 
+end 
+for n=1:length(bb3) 
+CarsCounter3=CarsCounter3+CarsCounter(bb3(n)); 
+end 
+for n=1:length(bb4) 
+CarsCounter4=CarsCounter4+CarsCounter(bb4(n)); 
+end 
+%% by and large expectation of autos capacities 
+GreenCounter1=sum(aa1) 
+CarsCounter1 
+GreenCounter2=sum(aa2) 
+CarsCounter2 
+GreenCounter3=sum(aa3) 
+CarsCounter3 
+GreenCounter4=sum(aa4) 
+CarsCounter4
